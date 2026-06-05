@@ -1,0 +1,8 @@
+{
+  "name": "schedule-scraper-mcp",
+  "version": "1.0.0",
+  "transport": "stdio",
+  "tools": ["get_today_episodes", "get_week_schedule"],
+  "rateLimit": { "requestsPerSecond": 2 },
+  "cache": { "ttlHours": 6 }
+}

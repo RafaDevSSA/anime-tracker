@@ -1,0 +1,7 @@
+{
+  "name": "anime-search-mcp",
+  "version": "1.0.0",
+  "transport": "stdio",
+  "tools": ["search_anime", "get_anime_details"],
+  "rateLimit": { "requestsPerSecond": 2 }
+}
