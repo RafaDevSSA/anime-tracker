@@ -1,5 +1,45 @@
 {
-  "enabledPlugins": {
-    "expo@claude-plugins-official": true
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c \"import docx\")",
+      "Bash(pip install *)",
+      "Bash(pip3 install *)",
+      "Bash(python3 -m pip install python-docx -q)",
+      "Bash(sudo apt-get install -y pandoc)",
+      "Bash(unzip -p animetracker-spec.docx word/document.xml)",
+      "Bash(python3 -)",
+      "Bash(npx create-expo-app@latest . --template tabs)",
+      "Read(//tmp/**)",
+      "Bash(npx create-expo-app@latest anime-tracker --template tabs)",
+      "Bash(npx expo *)",
+      "Bash(npm install *)",
+      "Bash(npm test *)",
+      "Bash(git --version)",
+      "Bash(npm --version)",
+      "Bash(curl -fsSL https://github.com/cli/cli/releases/download/v2.67.0/gh_2.67.0_linux_amd64.tar.gz -o /tmp/gh.tar.gz)",
+      "Bash(tar -xzf /tmp/gh.tar.gz -C /tmp)",
+      "Bash(mkdir -p ~/.local/bin)",
+      "Bash(cp /tmp/gh_2.67.0_linux_amd64/bin/gh ~/.local/bin/)",
+      "Bash(export PATH=\"$HOME/.local/bin:$PATH\")",
+      "Bash(gh auth *)",
+      "Bash(git init *)",
+      "Bash(git config *)",
+      "Bash(npx husky *)",
+      "Bash(gh repo *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(git branch *)",
+      "Bash(git add *)",
+      "Bash(gh pr create --title 'feat: code-review-skill e correção de tsconfig' --body ' *)",
+      "Bash(gh api *)",
+      "Bash(git checkout *)",
+      "Bash(git merge *)",
+      "Bash(curl -s http://localhost:8081/status)",
+      "Bash(npm run *)",
+      "Bash(curl -s -X POST http://localhost:3001/call -H 'Content-Type: application/json' -d '{\"tool\":\"search_anime\",\"params\":{\"name\":\"Dr Stone\"}}')",
+      "Bash(curl -s http://localhost:3002/health)",
+      "Bash(curl -s http://localhost:3001/health)",
+      "Bash(curl -s -X OPTIONS http://localhost:3001/call -H 'Origin: http://localhost:8081' -H 'Access-Control-Request-Method: POST' -I)"
+    ]
   }
 }
