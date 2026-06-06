@@ -1,6 +1,6 @@
 import {
   StyleSheet, FlatList, View, Text, Image,
-  TouchableOpacity, Alert, ActivityIndicator, Dimensions,
+  TouchableOpacity, Alert, ActivityIndicator, Dimensions, Platform,
 } from 'react-native';
 import { Link } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
@@ -84,6 +84,11 @@ export default function LibraryScreen() {
                 name={{ ios: 'trash', android: 'delete', web: 'delete' }}
                 tintColor={colors.textMuted}
                 size={16}
+                fallback={
+                  <Text style={{ color: colors.textMuted, fontSize: Platform.OS === 'web' ? 14 : 16, lineHeight: 16 }}>
+                    ✕
+                  </Text>
+                }
               />
             </TouchableOpacity>
           </View>
