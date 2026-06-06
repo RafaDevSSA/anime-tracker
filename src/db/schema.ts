@@ -1,14 +1,15 @@
 import * as SQLite from 'expo-sqlite';
 
-let _db: SQLite.SQLiteDatabase | null = null;
+const _DB_KEY = '__expo_sqlite_db__';
 
 export function setDatabase(db: SQLite.SQLiteDatabase): void {
-  _db = db;
+  (globalThis as any)[_DB_KEY] = db;
 }
 
 export function getDatabase(): SQLite.SQLiteDatabase {
-  if (!_db) throw new Error('Database not initialized. Ensure SQLiteProvider is mounted.');
-  return _db;
+  const db = (globalThis as any)[_DB_KEY] as SQLite.SQLiteDatabase | undefined;
+  if (!db) throw new Error('Database not initialized. Ensure SQLiteProvider is mounted.');
+  return db;
 }
 
 export async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {

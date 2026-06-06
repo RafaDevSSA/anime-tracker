@@ -1,11 +1,12 @@
 import {
   StyleSheet, FlatList, View, Text, Image,
-  TouchableOpacity, Alert, ActivityIndicator, Dimensions, Platform,
+  TouchableOpacity, ActivityIndicator, Dimensions, Platform,
 } from 'react-native';
 import { Link } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useAnimeList } from '@/src/hooks/useAnimeList';
 import { useTheme } from '@/src/context/ThemeContext';
+import { confirmDelete } from '@/src/utils/alert';
 
 const { width } = Dimensions.get('window');
 const COLUMNS = 2;
@@ -19,10 +20,7 @@ export default function LibraryScreen() {
   const s = makeStyles(colors);
 
   const handleDelete = (id: number, name: string) => {
-    Alert.alert('Remover', `Remover "${name}" da biblioteca?`, [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Remover', style: 'destructive', onPress: () => remove(id) },
-    ]);
+    confirmDelete(`Remover "${name}" da biblioteca?`, () => remove(id));
   };
 
   if (loading) {
