@@ -1,4 +1,5 @@
 import * as Notifications from 'expo-notifications';
+import { SettingsRepository } from '../db/SettingsRepository';
 import type { TodayEpisode } from '../types';
 
 Notifications.setNotificationHandler({
@@ -11,6 +12,12 @@ Notifications.setNotificationHandler({
   }),
 });
 
+function isInQuietHours(hour: number, quietStart: number, quietEnd: number): boolean {
+  if (quietStart <= quietEnd) return hour >= quietStart && hour < quietEnd;
+  // wraps midnight, e.g. 22-8
+  return hour >= quietStart || hour < quietEnd;
+}
+
 export const NotificationService = {
   async requestPermissions(): Promise<boolean> {
     const { status } = await Notifications.requestPermissionsAsync();
@@ -19,6 +26,10 @@ export const NotificationService = {
 
   async scheduleToday(episodes: TodayEpisode[]): Promise<void> {
     if (episodes.length === 0) return;
+
+    const { quietStart, quietEnd } = await SettingsRepository.get();
+    const currentHour = new Date().getHours();
+    if (isInQuietHours(currentHour, quietStart, quietEnd)) return;
 
     const lines = episodes.map((ep) => `${ep.title} ep ${ep.ep_num}`).join('\n');
     const count = episodes.length;
@@ -29,7 +40,7 @@ export const NotificationService = {
         body: lines,
         data: { mal_ids: episodes.map((e) => e.mal_id) },
       },
-      trigger: null, // disparo imediato
+      trigger: null,
     });
   },
 };

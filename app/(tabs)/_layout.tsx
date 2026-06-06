@@ -1,9 +1,9 @@
-import { SymbolView } from 'expo-symbols';
 import { Tabs } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
 
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
 import { useClientOnlyValue } from '@/components/useClientOnlyValue';
+import { useColorScheme } from '@/components/useColorScheme';
+import Colors from '@/constants/Colors';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -20,6 +20,15 @@ export default function TabLayout() {
           title: 'Hoje',
           tabBarIcon: ({ color }) => (
             <SymbolView name={{ ios: 'calendar', android: 'calendar_today', web: 'calendar_today' }} tintColor={color} size={26} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="schedule"
+        options={{
+          title: 'Semana',
+          tabBarIcon: ({ color }) => (
+            <SymbolView name={{ ios: 'calendar.badge.clock', android: 'event', web: 'event' }} tintColor={color} size={26} />
           ),
         }}
       />
@@ -42,11 +51,11 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="schedule"
+        name="settings"
         options={{
-          title: 'Semana',
+          title: 'Config.',
           tabBarIcon: ({ color }) => (
-            <SymbolView name={{ ios: 'calendar.badge.clock', android: 'event', web: 'event' }} tintColor={color} size={26} />
+            <SymbolView name={{ ios: 'gearshape', android: 'settings', web: 'settings' }} tintColor={color} size={26} />
           ),
         }}
       />

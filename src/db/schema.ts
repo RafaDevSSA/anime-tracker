@@ -35,5 +35,10 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
     CREATE INDEX IF NOT EXISTS idx_animes_mal_id ON animes(mal_id);
     CREATE INDEX IF NOT EXISTS idx_episodes_anime_id ON episodes(anime_id);
     CREATE INDEX IF NOT EXISTS idx_episodes_air_date ON episodes(air_date);
+
+    CREATE TABLE IF NOT EXISTS settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL
+    );
   `);
 }
