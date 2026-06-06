@@ -32,6 +32,7 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^20.0.0",
     "@types/react": "~19.2.2",
+    "concurrently": "^9.2.1",
     "husky": "^9.1.7",
     "jest": "^30.4.2",
     "ts-jest": "^29.4.11",
@@ -47,19 +48,28 @@
     "review": "ts-node skills/code-review-skill/cli.ts",
     "mcp:search": "npm run serve --prefix mcps/anime-search-mcp",
     "mcp:schedule": "npm run serve --prefix mcps/schedule-scraper-mcp",
-    "dev:all": "npx concurrently \"npm run mcp:search\" \"npm run mcp:schedule\" \"npm run web\"",
+    "dev:all": "concurrently --kill-others-on-fail --names \"mcp-search,mcp-schedule,expo\" --prefix-colors \"cyan,yellow,magenta\" \"npm run mcp:search\" \"npm run mcp:schedule\" \"npm run web\"",
     "test": "jest --testPathPatterns=src/"
   },
   "jest": {
     "testEnvironment": "node",
     "transform": {
-      "^.+\\.tsx?$": ["ts-jest", { "tsconfig": "tsconfig.test.json" }]
+      "^.+\\.tsx?$": [
+        "ts-jest",
+        {
+          "tsconfig": "tsconfig.test.json"
+        }
+      ]
     },
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/$1",
       "^expo-sqlite$": "<rootDir>/src/__mocks__/expo-sqlite.ts"
     },
-    "testPathIgnorePatterns": ["/node_modules/", "/mcps/", "/skills/"]
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/mcps/",
+      "/skills/"
+    ]
   },
   "private": true
 }
