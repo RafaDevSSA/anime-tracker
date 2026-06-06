@@ -1,5 +1,6 @@
 import { StyleSheet, FlatList, View, Text, Image, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { Link } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
 import { useAnimeList } from '@/src/hooks/useAnimeList';
 
 export default function LibraryScreen() {
@@ -45,20 +46,33 @@ export default function LibraryScreen() {
           </View>
         }
         renderItem={({ item }) => (
-          <Link href={`/anime/${item.id}`} asChild>
-            <TouchableOpacity style={styles.card} onLongPress={() => handleDelete(item.id, item.name)}>
-              {item.cover_url ? (
-                <Image source={{ uri: item.cover_url }} style={styles.cover} />
-              ) : (
-                <View style={[styles.cover, styles.coverPlaceholder]} />
-              )}
-              <View style={styles.info}>
-                <Text style={styles.animeName}>{item.name}</Text>
-                <Text style={styles.status}>{item.status}</Text>
-              </View>
-              <Text style={styles.chevron}>›</Text>
+          <View style={styles.cardWrapper}>
+            <Link href={`/anime/${item.id}`} asChild>
+              <TouchableOpacity style={styles.cardContent}>
+                {item.cover_url ? (
+                  <Image source={{ uri: item.cover_url }} style={styles.cover} />
+                ) : (
+                  <View style={[styles.cover, styles.coverPlaceholder]} />
+                )}
+                <View style={styles.info}>
+                  <Text style={styles.animeName}>{item.name}</Text>
+                  <Text style={styles.status}>{item.status}</Text>
+                </View>
+                <Text style={styles.chevron}>›</Text>
+              </TouchableOpacity>
+            </Link>
+            <TouchableOpacity
+              style={styles.deleteBtn}
+              onPress={() => handleDelete(item.id, item.name)}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <SymbolView
+                name={{ ios: 'trash', android: 'delete', web: 'delete' }}
+                tintColor="#ff4444"
+                size={20}
+              />
             </TouchableOpacity>
-          </Link>
+          </View>
         )}
       />
     </View>
@@ -76,11 +90,13 @@ const styles = StyleSheet.create({
   empty: { alignItems: 'center', marginTop: 80, paddingHorizontal: 24 },
   emptyTitle: { color: '#aaa', fontSize: 16, fontWeight: '600', marginBottom: 6 },
   emptyText: { color: '#555', fontSize: 14, textAlign: 'center' },
-  card: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginBottom: 12, backgroundColor: '#1a1a1a', borderRadius: 10, overflow: 'hidden' },
+  cardWrapper: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginBottom: 12, backgroundColor: '#1a1a1a', borderRadius: 10, overflow: 'hidden' },
+  cardContent: { flex: 1, flexDirection: 'row', alignItems: 'center' },
   cover: { width: 70, height: 100 },
   coverPlaceholder: { backgroundColor: '#333' },
   info: { flex: 1, paddingHorizontal: 12 },
   animeName: { color: '#fff', fontSize: 16, fontWeight: '600' },
   status: { color: '#aaa', fontSize: 12, marginTop: 4, textTransform: 'capitalize' },
   chevron: { color: '#555', fontSize: 22, marginRight: 14 },
+  deleteBtn: { paddingHorizontal: 14, paddingVertical: 14 },
 });
