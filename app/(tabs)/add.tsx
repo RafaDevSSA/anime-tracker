@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet, View, Text, TextInput, TouchableOpacity,
-  FlatList, Image, ActivityIndicator, Alert,
+  FlatList, Image, ActivityIndicator,
 } from 'react-native';
 import { router } from 'expo-router';
 import { AnimeService } from '@/src/services/AnimeService';
 import { useTheme } from '@/src/context/ThemeContext';
+import { showError } from '@/src/utils/alert';
 import type { AnimeCandidate } from '@/src/types';
 
 const DEBOUNCE_MS = 400;
@@ -53,11 +54,9 @@ export default function AddScreen() {
     setAdding(candidate.mal_id);
     try {
       await AnimeService.addToLibrary(candidate);
-      Alert.alert('Adicionado!', `${candidate.name} foi adicionado à biblioteca.`, [
-        { text: 'OK', onPress: () => router.replace('/(tabs)/library') },
-      ]);
+      router.replace('/(tabs)/library');
     } catch (e: any) {
-      Alert.alert('Erro', e.message);
+      showError('Erro', e.message ?? 'Não foi possível adicionar o anime.');
     } finally {
       setAdding(null);
     }

@@ -1,4 +1,5 @@
 import * as SQLite from 'expo-sqlite';
+import { Platform } from 'react-native';
 
 const _DB_KEY = '__expo_sqlite_db__';
 
@@ -14,7 +15,11 @@ export function getDatabase(): SQLite.SQLiteDatabase {
 
 export async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
   setDatabase(db);
-  await db.execAsync(`PRAGMA journal_mode = WAL;`);
+  // WAL mode requires extra OPFS file slots (-wal, -shm) that exhaust the
+  // AccessHandlePoolVFS pool on web, causing "cannot create file" on writes.
+  if (Platform.OS !== 'web') {
+    await db.execAsync(`PRAGMA journal_mode = WAL;`);
+  }
 
   await db.execAsync(`
     CREATE TABLE IF NOT EXISTS animes (
