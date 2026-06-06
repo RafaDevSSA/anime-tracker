@@ -52,9 +52,10 @@ export default function AnimeDetailScreen() {
       {
         text: 'Remover',
         style: 'destructive',
-        onPress: async () => {
-          await AnimeService.remove(anime.id);
-          router.back();
+        onPress: () => {
+          AnimeService.remove(anime.id)
+            .then(() => router.back())
+            .catch((e: any) => Alert.alert('Erro', e.message ?? 'Não foi possível remover o anime.'));
         },
       },
     ]);
