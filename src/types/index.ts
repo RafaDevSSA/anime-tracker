@@ -30,6 +30,7 @@ export interface AnimeDetail {
   synopsis: string | null;
   cover_url: string | null;
   total_episodes: number | null;
+  score: number | null;
   status: string;
   schedule: WeekSchedule | null;
 }

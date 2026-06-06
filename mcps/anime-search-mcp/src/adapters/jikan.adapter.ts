@@ -56,6 +56,7 @@ export async function getAnimeDetails(mal_id: number): Promise<AnimeDetail> {
     synopsis: a.synopsis,
     cover_url: a.images?.jpg?.image_url ?? null,
     total_episodes: a.episodes,
+    score: a.score ?? null,
     status: mapStatus(a.status),
     schedule,
   };
