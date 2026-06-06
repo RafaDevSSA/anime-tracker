@@ -31,9 +31,9 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
-      NotificationService.requestPermissions().then((granted) => {
-        if (granted) BackgroundTaskService.register();
-      });
+      NotificationService.requestPermissions()
+        .then((granted) => { if (granted) BackgroundTaskService.register(); })
+        .catch(() => {});
     }
   }, [loaded]);
 

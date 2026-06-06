@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
   StyleSheet, View, Text, TouchableOpacity, ActivityIndicator,
-  ScrollView, TextInput, Alert,
+  ScrollView, TextInput,
 } from 'react-native';
 import { SettingsRepository, type AppSettings } from '@/src/db/SettingsRepository';
 import { useTheme, type ThemeMode } from '@/src/context/ThemeContext';
+import { showError } from '@/src/utils/alert';
 
 function HourPicker({
   label, value, onChange, textColor, borderColor, inputBg,
@@ -16,7 +17,7 @@ function HourPicker({
   const commit = () => {
     const n = parseInt(text, 10);
     if (isNaN(n) || n < 0 || n > 23) {
-      Alert.alert('Valor inválido', 'Informe uma hora entre 0 e 23.');
+      showError('Valor inválido', 'Informe uma hora entre 0 e 23.');
       setText(String(value));
       return;
     }
@@ -63,8 +64,13 @@ export default function SettingsScreen() {
   const [saving, setSaving] = useState(false);
 
   const load = useCallback(async () => {
-    const s = await SettingsRepository.get();
-    setSettings(s);
+    try {
+      const s = await SettingsRepository.get();
+      setSettings(s);
+    } catch (e: any) {
+      showError('Erro', e.message ?? 'Não foi possível carregar as configurações.');
+      setSettings({ checkHour: 8, quietStart: 22, quietEnd: 8, colorScheme: 'system' });
+    }
   }, []);
 
   useEffect(() => { load(); }, [load]);

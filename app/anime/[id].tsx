@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import {
   StyleSheet, View, Text, Image, ActivityIndicator,
-  ScrollView, TouchableOpacity, Alert,
+  ScrollView, TouchableOpacity,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
+import { confirmDelete, showError } from '@/src/utils/alert';
 import { AnimeRepository } from '@/src/db/AnimeRepository';
 import { EpisodeRepository } from '@/src/db/EpisodeRepository';
 import { AnimeService } from '@/src/services/AnimeService';
@@ -49,18 +50,11 @@ export default function AnimeDetailScreen() {
 
   const handleDelete = () => {
     if (!anime) return;
-    Alert.alert('Remover', `Remover "${anime.name}" da biblioteca?`, [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Remover',
-        style: 'destructive',
-        onPress: () => {
-          AnimeService.remove(anime.id)
-            .then(() => router.back())
-            .catch((e: any) => Alert.alert('Erro', e.message ?? 'Não foi possível remover o anime.'));
-        },
-      },
-    ]);
+    confirmDelete(`Remover "${anime.name}" da biblioteca?`, () => {
+      AnimeService.remove(anime.id)
+        .then(() => router.back())
+        .catch((e: any) => showError('Erro', e.message ?? 'Não foi possível remover o anime.'));
+    });
   };
 
   const s = makeStyles(colors);

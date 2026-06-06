@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Alert } from 'react-native';
 import { AnimeService } from '../services/AnimeService';
+import { showError } from '../utils/alert';
 import type { Anime } from '../types';
 
 export function useAnimeList() {
@@ -28,7 +28,7 @@ export function useAnimeList() {
       await AnimeService.remove(id);
       setAnimes((prev) => prev.filter((a) => a.id !== id));
     } catch (e: any) {
-      Alert.alert('Erro', e.message ?? 'Não foi possível remover o anime.');
+      showError('Erro', e.message ?? 'Não foi possível remover o anime.');
     }
   }, []);
 
