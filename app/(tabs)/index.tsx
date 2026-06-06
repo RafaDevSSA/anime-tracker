@@ -1,4 +1,4 @@
-import { StyleSheet, FlatList, View, Text, Image, ActivityIndicator, RefreshControl } from 'react-native';
+import { StyleSheet, FlatList, View, Text, Image, ActivityIndicator, RefreshControl, TouchableOpacity } from 'react-native';
 import { useTodaySchedule } from '@/src/hooks/useTodaySchedule';
 import { ScheduleService } from '@/src/services/ScheduleService';
 import { useCallback, useState } from 'react';
@@ -20,7 +20,19 @@ export default function HomeScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color="#6c63ff" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.errorTitle}>Falha ao carregar agenda</Text>
+        <Text style={styles.errorText}>{error}</Text>
+        <TouchableOpacity style={styles.retryBtn} onPress={refresh}>
+          <Text style={styles.retryText}>Tentar novamente</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -28,15 +40,14 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Agenda de Hoje</Text>
-      {error && <Text style={styles.error}>{error}</Text>}
       <FlatList
         data={schedule}
         keyExtractor={(item) => String(item.id)}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#6c63ff" />}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyText}>Nenhum episódio novo hoje.</Text>
-            <Text style={styles.emptyHint}>Puxe para atualizar.</Text>
+            <Text style={styles.emptyTitle}>Nenhum episódio hoje</Text>
+            <Text style={styles.emptyText}>Puxe para baixo para verificar novos episódios.</Text>
           </View>
         }
         renderItem={({ item }) => (
@@ -59,12 +70,15 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0f0f0f' },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
   header: { fontSize: 22, fontWeight: '700', color: '#fff', padding: 16 },
-  error: { color: '#ff6b6b', paddingHorizontal: 16 },
-  empty: { alignItems: 'center', marginTop: 80 },
-  emptyText: { color: '#aaa', fontSize: 16 },
-  emptyHint: { color: '#555', fontSize: 13, marginTop: 4 },
+  errorTitle: { color: '#ff6b6b', fontSize: 17, fontWeight: '600', marginBottom: 6 },
+  errorText: { color: '#888', fontSize: 14, textAlign: 'center', marginBottom: 20 },
+  retryBtn: { backgroundColor: '#1a1a1a', borderWidth: 1, borderColor: '#6c63ff', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 28 },
+  retryText: { color: '#6c63ff', fontWeight: '600' },
+  empty: { alignItems: 'center', marginTop: 80, paddingHorizontal: 24 },
+  emptyTitle: { color: '#aaa', fontSize: 16, fontWeight: '600', marginBottom: 6 },
+  emptyText: { color: '#555', fontSize: 14, textAlign: 'center' },
   card: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginBottom: 12, backgroundColor: '#1a1a1a', borderRadius: 10, overflow: 'hidden' },
   cover: { width: 70, height: 100 },
   coverPlaceholder: { backgroundColor: '#333' },
