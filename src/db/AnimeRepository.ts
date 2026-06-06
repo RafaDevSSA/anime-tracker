@@ -3,22 +3,22 @@ import type { Anime } from '../types';
 
 export const AnimeRepository = {
   async findAll(): Promise<Anime[]> {
-    const db = await getDatabase();
+    const db = getDatabase();
     return db.getAllAsync<Anime>('SELECT * FROM animes ORDER BY name ASC');
   },
 
   async findById(id: number): Promise<Anime | null> {
-    const db = await getDatabase();
+    const db = getDatabase();
     return db.getFirstAsync<Anime>('SELECT * FROM animes WHERE id = ?', [id]);
   },
 
   async findByMalId(mal_id: number): Promise<Anime | null> {
-    const db = await getDatabase();
+    const db = getDatabase();
     return db.getFirstAsync<Anime>('SELECT * FROM animes WHERE mal_id = ?', [mal_id]);
   },
 
   async getAllMalIds(): Promise<number[]> {
-    const db = await getDatabase();
+    const db = getDatabase();
     const rows = await db.getAllAsync<{ mal_id: number }>(
       'SELECT mal_id FROM animes WHERE mal_id IS NOT NULL'
     );
@@ -26,7 +26,7 @@ export const AnimeRepository = {
   },
 
   async insert(anime: Omit<Anime, 'id' | 'created_at'>): Promise<number> {
-    const db = await getDatabase();
+    const db = getDatabase();
     const result = await db.runAsync(
       `INSERT INTO animes (name, mal_id, anilist_id, cover_url, status)
        VALUES (?, ?, ?, ?, ?)`,
@@ -36,7 +36,7 @@ export const AnimeRepository = {
   },
 
   async delete(id: number): Promise<void> {
-    const db = await getDatabase();
+    const db = getDatabase();
     await db.runAsync('DELETE FROM animes WHERE id = ?', [id]);
   },
 };
