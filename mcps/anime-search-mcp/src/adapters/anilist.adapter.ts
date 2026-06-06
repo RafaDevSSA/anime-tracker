@@ -37,6 +37,7 @@ const DETAIL_QUERY = `
       coverImage { large }
       episodes
       status
+      averageScore
       nextAiringEpisode { airingAt }
     }
   }
@@ -68,6 +69,7 @@ export async function getAnimeDetails(anilist_id: number): Promise<AnimeDetail> 
     synopsis: m.description ?? null,
     cover_url: m.coverImage?.large ?? null,
     total_episodes: m.episodes ?? null,
+    score: m.averageScore ? m.averageScore / 10 : null,
     status: mapStatus(m.status),
     schedule: null,
   };

@@ -1,5 +1,5 @@
 import { AnimeRepository } from '../db/AnimeRepository';
-import type { Anime, AnimeCandidate } from '../types';
+import type { Anime, AnimeCandidate, AnimeDetail } from '../types';
 
 const MCP_BASE_URL = process.env.EXPO_PUBLIC_ANIME_SEARCH_MCP_URL ?? 'http://localhost:3001';
 
@@ -32,5 +32,15 @@ export const AnimeService = {
 
   async remove(id: number): Promise<void> {
     return AnimeRepository.delete(id);
+  },
+
+  async getDetails(mal_id: number): Promise<AnimeDetail> {
+    const res = await fetch(`${MCP_BASE_URL}/call`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tool: 'get_anime_details', params: { mal_id } }),
+    });
+    if (!res.ok) throw new Error('Falha ao buscar detalhes do anime');
+    return res.json();
   },
 };
