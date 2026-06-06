@@ -11,7 +11,7 @@ const DEFAULTS: AppSettings = { checkHour: 8, quietStart: 22, quietEnd: 8, color
 
 export const SettingsRepository = {
   async get(): Promise<AppSettings> {
-    const db = await getDatabase();
+    const db = getDatabase();
     const rows = await db.getAllAsync<{ key: string; value: string }>('SELECT key, value FROM settings');
     const map = Object.fromEntries(rows.map((r) => [r.key, r.value]));
     return {
@@ -23,7 +23,7 @@ export const SettingsRepository = {
   },
 
   async set(key: 'checkHour' | 'quietStart' | 'quietEnd', value: number): Promise<void> {
-    const db = await getDatabase();
+    const db = getDatabase();
     await db.runAsync(
       'INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value',
       [key, String(value)]
@@ -31,13 +31,13 @@ export const SettingsRepository = {
   },
 
   async getString(key: string, fallback: string): Promise<string> {
-    const db = await getDatabase();
+    const db = getDatabase();
     const row = await db.getFirstAsync<{ value: string }>('SELECT value FROM settings WHERE key = ?', [key]);
     return row?.value ?? fallback;
   },
 
   async setString(key: string, value: string): Promise<void> {
-    const db = await getDatabase();
+    const db = getDatabase();
     await db.runAsync(
       'INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value',
       [key, value]

@@ -1,22 +1,18 @@
 import * as SQLite from 'expo-sqlite';
 
 let _db: SQLite.SQLiteDatabase | null = null;
-let _opening: Promise<SQLite.SQLiteDatabase> | null = null;
 
-export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
-  if (_db) return _db;
-  if (!_opening) {
-    _opening = (async () => {
-      const db = await SQLite.openDatabaseAsync('animetracker.db');
-      await runMigrations(db);
-      _db = db;
-      return db;
-    })();
-  }
-  return _opening;
+export function setDatabase(db: SQLite.SQLiteDatabase): void {
+  _db = db;
 }
 
-async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
+export function getDatabase(): SQLite.SQLiteDatabase {
+  if (!_db) throw new Error('Database not initialized. Ensure SQLiteProvider is mounted.');
+  return _db;
+}
+
+export async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
+  setDatabase(db);
   await db.execAsync(`PRAGMA journal_mode = WAL;`);
 
   await db.execAsync(`

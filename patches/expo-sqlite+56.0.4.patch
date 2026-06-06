@@ -1,0 +1,48 @@
+diff --git a/node_modules/expo-sqlite/web/SQLiteModule.ts b/node_modules/expo-sqlite/web/SQLiteModule.ts
+index a25679d..372bf7e 100644
+--- a/node_modules/expo-sqlite/web/SQLiteModule.ts
++++ b/node_modules/expo-sqlite/web/SQLiteModule.ts
+@@ -13,24 +13,37 @@ import {
+   type SQLiteRunResult,
+ } from '../src/NativeStatement';
+ 
+-let worker: Worker | null = null;
+ let nextNativeDatabaseId = 0;
+ let nextNativeStatementId = 0;
+ let nextNativeSessionId = 0;
+ 
++// Persist the Worker across module re-evaluations (Metro Fast Refresh).
++// Module-level `let worker` resets to null on each re-evaluation; if a new Worker
++// is created while the old one still holds OPFS SyncAccessHandles (exclusive),
++// AccessHandlePoolVFS.create() throws NoModificationAllowedError.
++// Storing in globalThis survives re-evaluation so the same Worker — and its VFS
++// handles — is reused throughout the page session.
++const _WORKER_KEY = '__expo_sqlite_worker__';
++const _MSG_HANDLER_KEY = '__expo_sqlite_msg_handler__';
++
+ function getWorker(): Worker {
+-  if (!worker) {
+-    worker = new Worker(new URL('./worker', window.location.href));
+-    worker.addEventListener('message', (event) => {
++  const g = globalThis as any;
++  // Always refresh the handler reference so the current deferredMap is used
++  // after a Fast Refresh re-evaluation of WorkerChannel.ts.
++  g[_MSG_HANDLER_KEY] = workerMessageHandler;
++  if (!g[_WORKER_KEY]) {
++    const w = new Worker(new URL('./worker', window.location.href));
++    w.addEventListener('message', (event) => {
+       if (event.data.type === 'onDatabaseChange') {
+         // @ts-expect-error EventEmitter type for NativeModule is not inferred correctly on web.
+         SQLiteModuleInstance.emit(event.data.type, event.data.data);
+         return;
+       }
+-      workerMessageHandler(event);
++      (g[_MSG_HANDLER_KEY] as typeof workerMessageHandler)?.(event);
+     });
++    g[_WORKER_KEY] = w;
+   }
+-  return worker;
++  return g[_WORKER_KEY];
+ }
+ 
+ // web worker works on Uint8Array, but session methods accept ArrayBuffer too
