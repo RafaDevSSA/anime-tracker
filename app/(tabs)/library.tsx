@@ -1,10 +1,22 @@
-import { StyleSheet, FlatList, View, Text, Image, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import {
+  StyleSheet, FlatList, View, Text, Image,
+  TouchableOpacity, Alert, ActivityIndicator, Dimensions,
+} from 'react-native';
 import { Link } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useAnimeList } from '@/src/hooks/useAnimeList';
+import { useTheme } from '@/src/context/ThemeContext';
+
+const { width } = Dimensions.get('window');
+const COLUMNS = 2;
+const CARD_MARGIN = 8;
+const CARD_WIDTH = (width - CARD_MARGIN * (COLUMNS + 1) * 2) / COLUMNS;
+const COVER_HEIGHT = CARD_WIDTH * 1.45;
 
 export default function LibraryScreen() {
   const { animes, loading, error, refresh, remove } = useAnimeList();
+  const { colors } = useTheme();
+  const s = makeStyles(colors);
 
   const handleDelete = (id: number, name: string) => {
     Alert.alert('Remover', `Remover "${name}" da biblioteca?`, [
@@ -15,61 +27,63 @@ export default function LibraryScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#6c63ff" />
+      <View style={s.center}>
+        <ActivityIndicator size="large" color={colors.accent} />
       </View>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.errorTitle}>Falha ao carregar biblioteca</Text>
-        <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity style={styles.retryBtn} onPress={refresh}>
-          <Text style={styles.retryText}>Tentar novamente</Text>
+      <View style={s.center}>
+        <Text style={s.errorTitle}>Falha ao carregar biblioteca</Text>
+        <Text style={s.errorText}>{error}</Text>
+        <TouchableOpacity style={s.retryBtn} onPress={refresh}>
+          <Text style={s.retryText}>Tentar novamente</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Biblioteca</Text>
+    <View style={s.container}>
+      <Text style={s.header}>Minha Biblioteca</Text>
       <FlatList
         data={animes}
+        numColumns={COLUMNS}
         keyExtractor={(item) => String(item.id)}
+        contentContainerStyle={s.grid}
+        columnWrapperStyle={s.row}
         ListEmptyComponent={
-          <View style={styles.empty}>
-            <Text style={styles.emptyTitle}>Biblioteca vazia</Text>
-            <Text style={styles.emptyText}>Use a aba + para adicionar animes.</Text>
+          <View style={s.empty}>
+            <Text style={s.emptyTitle}>Biblioteca vazia</Text>
+            <Text style={s.emptyText}>Use a aba + para adicionar animes.</Text>
           </View>
         }
         renderItem={({ item }) => (
-          <View style={styles.cardWrapper}>
+          <View style={s.card}>
             <Link href={`/anime/${item.id}`} asChild>
-              <TouchableOpacity style={styles.cardContent}>
+              <TouchableOpacity activeOpacity={0.8}>
                 {item.cover_url ? (
-                  <Image source={{ uri: item.cover_url }} style={styles.cover} />
+                  <Image source={{ uri: item.cover_url }} style={s.cover} />
                 ) : (
-                  <View style={[styles.cover, styles.coverPlaceholder]} />
+                  <View style={[s.cover, s.coverPlaceholder]} />
                 )}
-                <View style={styles.info}>
-                  <Text style={styles.animeName}>{item.name}</Text>
-                  <Text style={styles.status}>{item.status}</Text>
+                <View style={s.cardBody}>
+                  <Text style={s.animeName} numberOfLines={2}>{item.name}</Text>
+                  <Text style={s.status}>{statusLabel(item.status)}</Text>
                 </View>
-                <Text style={styles.chevron}>›</Text>
               </TouchableOpacity>
             </Link>
             <TouchableOpacity
-              style={styles.deleteBtn}
+              style={s.deleteBtn}
               onPress={() => handleDelete(item.id, item.name)}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
             >
               <SymbolView
                 name={{ ios: 'trash', android: 'delete', web: 'delete' }}
-                tintColor="#ff4444"
-                size={20}
+                tintColor={colors.textMuted}
+                size={16}
               />
             </TouchableOpacity>
           </View>
@@ -79,24 +93,43 @@ export default function LibraryScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f0f0f' },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
-  header: { fontSize: 22, fontWeight: '700', color: '#fff', padding: 16 },
-  errorTitle: { color: '#ff6b6b', fontSize: 17, fontWeight: '600', marginBottom: 6 },
-  errorText: { color: '#888', fontSize: 14, textAlign: 'center', marginBottom: 20 },
-  retryBtn: { backgroundColor: '#1a1a1a', borderWidth: 1, borderColor: '#6c63ff', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 28 },
-  retryText: { color: '#6c63ff', fontWeight: '600' },
-  empty: { alignItems: 'center', marginTop: 80, paddingHorizontal: 24 },
-  emptyTitle: { color: '#aaa', fontSize: 16, fontWeight: '600', marginBottom: 6 },
-  emptyText: { color: '#555', fontSize: 14, textAlign: 'center' },
-  cardWrapper: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginBottom: 12, backgroundColor: '#1a1a1a', borderRadius: 10, overflow: 'hidden' },
-  cardContent: { flex: 1, flexDirection: 'row', alignItems: 'center' },
-  cover: { width: 70, height: 100 },
-  coverPlaceholder: { backgroundColor: '#333' },
-  info: { flex: 1, paddingHorizontal: 12 },
-  animeName: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  status: { color: '#aaa', fontSize: 12, marginTop: 4, textTransform: 'capitalize' },
-  chevron: { color: '#555', fontSize: 22, marginRight: 14 },
-  deleteBtn: { paddingHorizontal: 14, paddingVertical: 14 },
-});
+function statusLabel(status: string) {
+  const map: Record<string, string> = { airing: 'Em exibição', completed: 'Completo', unknown: 'Desconhecido' };
+  return map[status] ?? status;
+}
+
+function makeStyles(c: ReturnType<typeof useTheme>['colors']) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: c.background },
+    center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
+    header: { fontSize: 22, fontWeight: '700', color: c.text, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
+    errorTitle: { color: c.error, fontSize: 17, fontWeight: '600', marginBottom: 6 },
+    errorText: { color: c.textSecondary, fontSize: 14, textAlign: 'center', marginBottom: 20 },
+    retryBtn: {
+      backgroundColor: c.surface,
+      borderWidth: 1, borderColor: c.accent,
+      borderRadius: 8, paddingVertical: 10, paddingHorizontal: 28,
+    },
+    retryText: { color: c.accent, fontWeight: '600' },
+    empty: { alignItems: 'center', marginTop: 80, paddingHorizontal: 24 },
+    emptyTitle: { color: c.textSecondary, fontSize: 16, fontWeight: '600', marginBottom: 6 },
+    emptyText: { color: c.textMuted, fontSize: 14, textAlign: 'center' },
+    grid: { paddingHorizontal: CARD_MARGIN, paddingBottom: 24 },
+    row: { justifyContent: 'space-between' },
+    card: {
+      width: CARD_WIDTH,
+      backgroundColor: c.card,
+      borderRadius: 10,
+      marginBottom: CARD_MARGIN * 2,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: c.border,
+    },
+    cover: { width: CARD_WIDTH, height: COVER_HEIGHT },
+    coverPlaceholder: { backgroundColor: c.border },
+    cardBody: { padding: 8 },
+    animeName: { color: c.text, fontSize: 13, fontWeight: '600', lineHeight: 18 },
+    status: { color: c.accent, fontSize: 11, marginTop: 4 },
+    deleteBtn: { position: 'absolute', top: 6, right: 6, backgroundColor: 'rgba(0,0,0,0.55)', borderRadius: 6, padding: 5 },
+  });
+}

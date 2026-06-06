@@ -1,10 +1,11 @@
 import { useFonts } from 'expo-font';
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider as RouterThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
+import { ThemeProvider } from '@/src/context/ThemeContext';
 import { NotificationService } from '@/src/services/NotificationService';
 import { BackgroundTaskService } from '@/src/services/BackgroundTaskService';
 
@@ -43,11 +44,13 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="anime/[id]" options={{ title: 'Detalhes', headerBackTitle: 'Voltar' }} />
-      </Stack>
+    <ThemeProvider>
+      <RouterThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="anime/[id]" options={{ title: 'Detalhes', headerBackTitle: 'Voltar' }} />
+        </Stack>
+      </RouterThemeProvider>
     </ThemeProvider>
   );
 }

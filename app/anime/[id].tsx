@@ -7,6 +7,7 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { AnimeRepository } from '@/src/db/AnimeRepository';
 import { EpisodeRepository } from '@/src/db/EpisodeRepository';
 import { AnimeService } from '@/src/services/AnimeService';
+import { useTheme } from '@/src/context/ThemeContext';
 import type { Anime, Episode, AnimeDetail } from '@/src/types';
 
 const DAY_PT: Record<string, string> = {
@@ -16,6 +17,7 @@ const DAY_PT: Record<string, string> = {
 
 export default function AnimeDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { colors } = useTheme();
   const [anime, setAnime] = useState<Anime | null>(null);
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [detail, setDetail] = useState<AnimeDetail | null>(null);
@@ -61,131 +63,144 @@ export default function AnimeDetailScreen() {
     ]);
   };
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#6c63ff" />
-      </View>
-    );
-  }
+  const s = makeStyles(colors);
 
-  if (loadError) {
-    return (
-      <View style={styles.center}>
-        <Text style={styles.errorTitle}>Falha ao carregar</Text>
-        <Text style={styles.errorText}>{loadError}</Text>
-        <TouchableOpacity style={styles.retryBtn} onPress={load}>
-          <Text style={styles.retryText}>Tentar novamente</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <Text style={styles.backText}>Voltar</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+  if (loading) return (
+    <View style={s.center}>
+      <ActivityIndicator size="large" color={colors.accent} />
+    </View>
+  );
 
-  if (!anime) {
-    return (
-      <View style={styles.center}>
-        <Text style={styles.notFound}>Anime não encontrado.</Text>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <Text style={styles.backText}>Voltar</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+  if (loadError) return (
+    <View style={s.center}>
+      <Text style={s.errorTitle}>Falha ao carregar</Text>
+      <Text style={s.errorText}>{loadError}</Text>
+      <TouchableOpacity style={s.retryBtn} onPress={load}>
+        <Text style={s.retryText}>Tentar novamente</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
+        <Text style={s.backText}>Voltar</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  if (!anime) return (
+    <View style={s.center}>
+      <Text style={s.notFound}>Anime não encontrado.</Text>
+      <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
+        <Text style={s.backText}>Voltar</Text>
+      </TouchableOpacity>
+    </View>
+  );
 
   const coverUrl = detail?.cover_url ?? anime.cover_url;
   const schedule = detail?.schedule;
   const dayLabel = schedule?.day_of_week ? (DAY_PT[schedule.day_of_week] ?? schedule.day_of_week) : null;
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={s.container}>
       {coverUrl ? (
-        <Image source={{ uri: coverUrl }} style={styles.banner} />
+        <Image source={{ uri: coverUrl }} style={s.banner} />
       ) : (
-        <View style={[styles.banner, styles.bannerPlaceholder]} />
+        <View style={[s.banner, s.bannerPlaceholder]} />
       )}
 
-      <View style={styles.content}>
-        <Text style={styles.title}>{anime.name}</Text>
+      <View style={s.content}>
+        <Text style={s.title}>{anime.name}</Text>
 
-        {/* Score e status */}
-        <View style={styles.metaRow}>
-          <Text style={styles.statusBadge}>{anime.status}</Text>
+        <View style={s.metaRow}>
+          <View style={s.statusBadge}>
+            <Text style={s.statusBadgeText}>{statusLabel(anime.status)}</Text>
+          </View>
           {detail?.score != null && (
-            <Text style={styles.score}>★ {detail.score.toFixed(1)}</Text>
+            <Text style={s.score}>★ {detail.score.toFixed(1)}</Text>
           )}
           {detail?.total_episodes != null && (
-            <Text style={styles.metaItem}>{detail.total_episodes} ep</Text>
+            <Text style={s.metaItem}>{detail.total_episodes} ep</Text>
           )}
         </View>
 
-        {/* Exibição semanal */}
         {dayLabel && (
-          <View style={styles.scheduleRow}>
-            <Text style={styles.scheduleLabel}>Exibição:</Text>
-            <Text style={styles.scheduleValue}>
+          <View style={s.scheduleRow}>
+            <Text style={s.scheduleLabel}>Exibição:</Text>
+            <Text style={s.scheduleValue}>
               {dayLabel}{schedule?.air_time ? ` às ${schedule.air_time}` : ''}
               {schedule?.timezone ? ` (${schedule.timezone})` : ''}
             </Text>
           </View>
         )}
 
-        {/* Sinopse */}
         {detail?.synopsis ? (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Sinopse</Text>
-            <Text style={styles.synopsis}>{detail.synopsis}</Text>
+          <View style={s.section}>
+            <Text style={s.sectionTitle}>Sinopse</Text>
+            <Text style={s.synopsis}>{detail.synopsis}</Text>
           </View>
         ) : null}
 
-        {/* Episódios hoje */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Episódios Hoje</Text>
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Episódios Hoje</Text>
           {episodes.length > 0 ? (
             episodes.map((ep) => (
-              <Text key={ep.id} style={styles.episode}>Episódio {ep.episode_num}</Text>
+              <View key={ep.id} style={s.epRow}>
+                <View style={s.epBadge}>
+                  <Text style={s.epBadgeText}>EP {ep.episode_num}</Text>
+                </View>
+              </View>
             ))
           ) : (
-            <Text style={styles.noEpisodes}>Nenhum episódio hoje.</Text>
+            <Text style={s.noEpisodes}>Nenhum episódio hoje.</Text>
           )}
         </View>
 
-        <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete}>
-          <Text style={styles.deleteBtnText}>Remover da Biblioteca</Text>
+        <TouchableOpacity style={s.deleteBtn} onPress={handleDelete}>
+          <Text style={s.deleteBtnText}>Remover da Biblioteca</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f0f0f' },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
-  notFound: { color: '#aaa', fontSize: 16, marginBottom: 20 },
-  errorTitle: { color: '#ff6b6b', fontSize: 17, fontWeight: '600', marginBottom: 6 },
-  errorText: { color: '#888', fontSize: 14, textAlign: 'center', marginBottom: 20 },
-  retryBtn: { backgroundColor: '#1a1a1a', borderWidth: 1, borderColor: '#6c63ff', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 28, marginBottom: 12 },
-  retryText: { color: '#6c63ff', fontWeight: '600' },
-  backBtn: { paddingVertical: 8 },
-  backText: { color: '#555', fontSize: 14 },
-  banner: { width: '100%', height: 260 },
-  bannerPlaceholder: { backgroundColor: '#333' },
-  content: { padding: 16 },
-  title: { color: '#fff', fontSize: 22, fontWeight: '700', marginBottom: 10 },
-  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 10, flexWrap: 'wrap' },
-  statusBadge: { backgroundColor: '#1a1a1a', color: '#aaa', fontSize: 12, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 4, textTransform: 'capitalize' },
-  score: { color: '#ffd700', fontSize: 15, fontWeight: '700' },
-  metaItem: { color: '#888', fontSize: 13 },
-  scheduleRow: { flexDirection: 'row', gap: 6, marginBottom: 14, flexWrap: 'wrap' },
-  scheduleLabel: { color: '#6c63ff', fontSize: 13, fontWeight: '600' },
-  scheduleValue: { color: '#ccc', fontSize: 13 },
-  section: { marginBottom: 20 },
-  sectionTitle: { color: '#6c63ff', fontSize: 15, fontWeight: '600', marginBottom: 8 },
-  synopsis: { color: '#bbb', fontSize: 14, lineHeight: 21 },
-  episode: { color: '#ccc', fontSize: 14, marginBottom: 4 },
-  noEpisodes: { color: '#555', fontSize: 14 },
-  deleteBtn: { backgroundColor: '#3a1a1a', borderWidth: 1, borderColor: '#ff4444', borderRadius: 8, padding: 14, alignItems: 'center', marginTop: 20 },
-  deleteBtnText: { color: '#ff4444', fontWeight: '600' },
-});
+function statusLabel(status: string) {
+  const map: Record<string, string> = { airing: 'Em exibição', completed: 'Completo', unknown: 'Desconhecido' };
+  return map[status] ?? status;
+}
+
+function makeStyles(c: ReturnType<typeof useTheme>['colors']) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: c.background },
+    center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
+    notFound: { color: c.textSecondary, fontSize: 16, marginBottom: 20 },
+    errorTitle: { color: c.error, fontSize: 17, fontWeight: '600', marginBottom: 6 },
+    errorText: { color: c.textSecondary, fontSize: 14, textAlign: 'center', marginBottom: 20 },
+    retryBtn: { backgroundColor: c.surface, borderWidth: 1, borderColor: c.accent, borderRadius: 8, paddingVertical: 10, paddingHorizontal: 28, marginBottom: 12 },
+    retryText: { color: c.accent, fontWeight: '600' },
+    backBtn: { paddingVertical: 8 },
+    backText: { color: c.textMuted, fontSize: 14 },
+    banner: { width: '100%', height: 280 },
+    bannerPlaceholder: { backgroundColor: c.border },
+    content: { padding: 16 },
+    title: { color: c.text, fontSize: 22, fontWeight: '700', marginBottom: 10 },
+    metaRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12, flexWrap: 'wrap' },
+    statusBadge: { backgroundColor: c.accentSubtle, borderRadius: 4, paddingHorizontal: 8, paddingVertical: 3 },
+    statusBadgeText: { color: c.accent, fontSize: 12, fontWeight: '600' },
+    score: { color: c.score, fontSize: 15, fontWeight: '700' },
+    metaItem: { color: c.textSecondary, fontSize: 13 },
+    scheduleRow: { flexDirection: 'row', gap: 6, marginBottom: 16, flexWrap: 'wrap' },
+    scheduleLabel: { color: c.accent, fontSize: 13, fontWeight: '600' },
+    scheduleValue: { color: c.textSecondary, fontSize: 13 },
+    section: { marginBottom: 20 },
+    sectionTitle: { color: c.accent, fontSize: 15, fontWeight: '600', marginBottom: 10 },
+    synopsis: { color: c.textSecondary, fontSize: 14, lineHeight: 22 },
+    epRow: { marginBottom: 6 },
+    epBadge: { alignSelf: 'flex-start', backgroundColor: c.accentSubtle, borderRadius: 4, paddingHorizontal: 10, paddingVertical: 4 },
+    epBadgeText: { color: c.accent, fontSize: 13, fontWeight: '700' },
+    noEpisodes: { color: c.textMuted, fontSize: 14 },
+    deleteBtn: {
+      backgroundColor: 'transparent',
+      borderWidth: 1, borderColor: c.error,
+      borderRadius: 8, padding: 14,
+      alignItems: 'center', marginTop: 20,
+    },
+    deleteBtnText: { color: c.error, fontWeight: '600' },
+  });
+}
