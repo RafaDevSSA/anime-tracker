@@ -1,12 +1,19 @@
 import * as SQLite from 'expo-sqlite';
 
 let _db: SQLite.SQLiteDatabase | null = null;
+let _opening: Promise<SQLite.SQLiteDatabase> | null = null;
 
 export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
   if (_db) return _db;
-  _db = await SQLite.openDatabaseAsync('animetracker.db');
-  await runMigrations(_db);
-  return _db;
+  if (!_opening) {
+    _opening = (async () => {
+      const db = await SQLite.openDatabaseAsync('animetracker.db');
+      await runMigrations(db);
+      _db = db;
+      return db;
+    })();
+  }
+  return _opening;
 }
 
 async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
