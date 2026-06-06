@@ -1,6 +1,6 @@
 import { AnimeRepository } from '../db/AnimeRepository';
 import { EpisodeRepository } from '../db/EpisodeRepository';
-import type { TodayEpisode } from '../types';
+import type { Anime, TodayEpisode, WeekSchedule } from '../types';
 
 const MCP_BASE_URL = process.env.EXPO_PUBLIC_SCHEDULE_MCP_URL ?? 'http://localhost:3002';
 
@@ -30,5 +30,24 @@ export const ScheduleService = {
 
   async getTodayFromDB() {
     return EpisodeRepository.findTodayAll();
+  },
+
+  async getWeekSchedules(): Promise<Array<{ anime: Anime; schedule: WeekSchedule | null }>> {
+    const animes = await AnimeRepository.findAll();
+    const results = await Promise.allSettled(
+      animes.map(async (anime) => {
+        if (!anime.mal_id) return { anime, schedule: null };
+        const res = await fetch(`${MCP_BASE_URL}/call`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tool: 'get_week_schedule', params: { mal_id: anime.mal_id } }),
+        });
+        const schedule: WeekSchedule | null = res.ok ? await res.json() : null;
+        return { anime, schedule };
+      })
+    );
+    return results
+      .filter((r): r is PromiseFulfilledResult<{ anime: Anime; schedule: WeekSchedule | null }> => r.status === 'fulfilled')
+      .map((r) => r.value);
   },
 };
