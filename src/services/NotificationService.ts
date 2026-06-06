@@ -20,8 +20,13 @@ function isInQuietHours(hour: number, quietStart: number, quietEnd: number): boo
 
 export const NotificationService = {
   async requestPermissions(): Promise<boolean> {
-    const { status } = await Notifications.requestPermissionsAsync();
-    return status === 'granted';
+    try {
+      const { status } = await Notifications.requestPermissionsAsync();
+      return status === 'granted';
+    } catch {
+      // expo-notifications not fully supported in Expo Go (SDK 53+)
+      return false;
+    }
   },
 
   async scheduleToday(episodes: TodayEpisode[]): Promise<void> {
