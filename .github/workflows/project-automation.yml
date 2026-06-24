@@ -25,5 +25,5 @@ jobs:
           GH_TOKEN: ${{ secrets.PROJECT_AUTOMATION_PAT }}
         run: |
           gh issue list --repo ${{ github.repository }} --search "linked:pr-${{ github.event.pull_request.number }}" --json number --jq '.[].number' | while read -r num; do
-            gh project item-edit --owner RafaDevSSA --project-id PVT_kwHOA7Hqc84BZ0PD --id "$(gh project item-list 1 --owner RafaDevSSA --format json | jq -r --arg n "$num" '.items[] | select(.content.number == ($n | tonumber)) | .id')" --field-id PVTSSF_lAHOA7Hqc84BZ0PDzhUwSkc --single-select-option-id 98236657
+            gh project item-edit --project-id PVT_kwHOA7Hqc84BZ0PD --id "$(gh project item-list 1 --owner RafaDevSSA --format json | jq -r --arg n "$num" '.items[] | select(.content.number == ($n | tonumber)) | .id')" --field-id PVTSSF_lAHOA7Hqc84BZ0PDzhUwSkc --single-select-option-id 98236657
           done
